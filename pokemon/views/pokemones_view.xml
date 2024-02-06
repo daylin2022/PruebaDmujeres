@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="pokemon_tree">
+            <field name="name">pokemon.view.tree</field>
+            <field name="model">pokemon</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <tree string="Pokemones" editable="bottom">
+                    <field name="name" />
+                    <field name="url"/>
+                </tree>
+            </field>
+        </record>
+
+
+
+        <record model="ir.actions.act_window" id="act_pokemon_view">
+            <field name="name">Pokemones</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">pokemon</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="pokemon_tree"/>
+        </record>
+
+        
+    <menuitem id="menu_pokemon_root" name="Pokemones"
+                  sequence="15"
+                  web_icon="pokemon,static/description/board.png" active="True"/>
+
+    <menuitem id="menu_pokemones"
+                      name="Pokemones"
+                      parent="pokemon.menu_pokemon_root"
+                      sequence="1"
+                      action="act_pokemon_view"/>
+        
+
+    </data>
+</odoo>
