@@ -98,7 +98,7 @@ class OdooController(http.Controller):
             value_dict = {}
             value_dict["id"] = sale.id
             value_dict["createtime"] = sale.create_date.strftime("%Y-%m-%d %H:%M:%S")
-            value_dict["document_number"] = "001-001-00001234"
+            value_dict["document_number"] = sale.name
             value_dict["customer"] = {}
             if sale.partner_id:
                 if sale.partner_id.document_type=="CEDULA":
