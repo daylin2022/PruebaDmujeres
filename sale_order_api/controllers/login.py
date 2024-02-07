@@ -6,7 +6,7 @@ import json
 import logging, functools
 import werkzeug.wrappers
 
-from odoo.addons.project_api.models.common import invalid_response, valid_response
+from odoo.addons.sale_order_api.models.common import invalid_response, valid_response
 from odoo.exceptions import AccessDenied, AccessError
 from odoo.http import request
 
@@ -108,12 +108,12 @@ class OdooController(http.Controller):
                 else:
                     document_type="Pasaporte"
                 value_dict["customer"]["document_type"] = sale.partner_id.document_type
-                value_dict["customer"]["document_number"] = sale.partner_id.vat
-                value_dict["customer"]["first_name"] = ""
-                value_dict["customer"]["last_name"] = ""
-                value_dict["customer"]["phone"] = sale.partner_id.mobile
-                value_dict["customer"]["address"] = sale.partner_id.street
-                value_dict["customer"]["email"] = sale.partner_id.email
+                value_dict["customer"]["document_number"] = sale.partner_id.vat or "N/A"
+                value_dict["customer"]["first_name"] = sale.partner_id.first_name or "N/A"
+                value_dict["customer"]["last_name"] = sale.partner_id.last_name or "N/A"
+                value_dict["customer"]["phone"] = sale.partner_id.mobile or "N/A"
+                value_dict["customer"]["address"] = sale.partner_id.street or "N/A"
+                value_dict["customer"]["email"] = sale.partner_id.email or "N/A"
             value_dict["items"] = []
             amount_tax = 0.00
             for line in sale.order_line:
@@ -165,27 +165,34 @@ class OdooController(http.Controller):
                 error = "Customer Identification required"
                 _logger.error(info)
                 return invalid_response(401, error, info)
-            if not partner_id:
-                document_type=""
-                if payload["customer"].get("document_type"):
-                    if payload["customer"].get("document_type")=="Cédula":
-                        document_type="CEDULA"
-                    elif payload["customer"].get("document_type")=="RUC":
-                        document_type="RUC"
-                    else:
-                        document_type=="Pasaporte"
-                name_partner=""
-                if payload["customer"].get("first_name"):
-                    name_partner=payload["customer"].get("first_name")+" "
-                if payload["customer"].get("last_name"):
-                    name_partner+=payload["customer"].get("first_name")
-                partner_id = request.env['res.partner'].with_user(user_obj).create({"name":payload["customer"].get("firs_name") or "",
+            document_type=""
+            if payload["customer"].get("document_type"):
+                if payload["customer"].get("document_type")=="Cédula":
+                    document_type="CEDULA"
+                elif payload["customer"].get("document_type")=="RUC":
+                    document_type="RUC"
+                else:
+                    document_type=="Pasaporte"
+            first_name=""
+            last_name=""
+            if payload["customer"].get("first_name"):
+                first_name=payload["customer"].get("first_name")
+            if payload["customer"].get("last_name"):
+                last_name=payload["customer"].get("last_name")
+
+            dct_partner = {"name":payload["customer"].get("firs_name") or "",
                                                                         "vat":payload["customer"].get("document_number"),
                                                                         "document_type": document_type,
-                                                                        "name":name_partner,
+                                                                        "first_name":first_name,
+                                                                        "last_name":last_name,
                                                                         "mobile":payload["customer"].get("phone") or "",
                                                                         "street":payload["customer"].get("address") or "",
-                                                                        "email":payload["customer"].get("email") or "",})
+                                                                        "email":payload["customer"].get("email") or "",}
+            if not partner_id:
+                partner_id = request.env['res.partner'].with_user(user_obj).create(dct_partner)
+            else:
+                partner_id.with_user(user_obj).write(dct_partner)
+
         else:
             info = "Customer required"
             error = "Customer required"

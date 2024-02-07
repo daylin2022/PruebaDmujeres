@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="PaquetesButton" owl="1">
+        <div class="control-button">
+             <i class="fa fa-user" role="img" aria-label="Paquete" title="Empaquetados" />
+            Empaquetados
+        </div>
+    </t>
+</templates>
